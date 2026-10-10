@@ -1,34 +1,42 @@
 provider "aws" {
-  region  = "eu-central-1"
-  profile = "az-en-profilom"
+  region = var.region
+
+  default_tags {
+    tags = {
+      Project   = var.project_name
+      ManagedBy = "terraform"
+    }
+  }
 }
 
-# 1. Alap infrastruktúra (Default VPC és Subnetek lekérdezése)
+# 1. Hálózat (default VPC és subnetek lekérdezése)
 module "infra" {
   source = "./modules/infra"
 }
 
 # 2. Load Balancer (ALB, Target Group, Security Group)
 module "loadbalance" {
-  source     = "./modules/load-balancer"
-  vpc_id     = module.infra.vpc_id
-  subnet_ids = module.infra.subnet_ids
+  source       = "./modules/lb"
+  project_name = var.project_name
+  vpc_id       = module.infra.vpc_id
+  subnet_ids   = module.infra.subnet_ids
 }
 
-# 3. IAM & SSM (Biztonságos, kulcsnélküli távoli eléréshez)
+# 3. IAM & SSM (kulcsnélküli belépés)
 module "iam" {
   source = "./modules/iam-ssm"
 }
 
-# 4. Compute & ASG (Launch Template, ASG, Ubuntu AMI)
+# 4. Compute & ASG
 module "instances" {
-  source                    = "./modules/compute-asg"
+  source                    = "./modules/asg"
+  project_name              = var.project_name
   vpc_id                    = module.infra.vpc_id
   subnet_ids                = module.infra.subnet_ids
   target_group_arns         = [module.loadbalance.target_group_arn]
+  lb_security_group_id      = module.loadbalance.lb_security_group_id
   iam_instance_profile_name = module.iam.instance_profile_name
-  
-  # Értékek átadása a tfvars / gyökér változókból
-  instance_type             = var.instance_type
-  ami_id                    = var.ami_id
+
+  instance_type = var.instance_type
+  ami_id        = var.ami_id
 }
