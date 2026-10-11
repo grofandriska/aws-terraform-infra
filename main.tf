@@ -9,12 +9,10 @@ provider "aws" {
   }
 }
 
-# 1. Hálózat (default VPC és subnetek lekérdezése)
 module "infra" {
   source = "./modules/infra"
 }
 
-# 2. Load Balancer (ALB, Target Group, Security Group)
 module "loadbalance" {
   source       = "./modules/lb"
   project_name = var.project_name
@@ -22,12 +20,10 @@ module "loadbalance" {
   subnet_ids   = module.infra.subnet_ids
 }
 
-# 3. IAM & SSM (kulcsnélküli belépés)
 module "iam" {
   source = "./modules/iam-ssm"
 }
 
-# 4. Compute & ASG
 module "instances" {
   source                    = "./modules/asg"
   project_name              = var.project_name
