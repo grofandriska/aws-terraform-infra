@@ -4,13 +4,13 @@ provider "aws" {
   default_tags {
     tags = {
       Project   = var.project_name
-      ManagedBy = "Bando"
+      ManagedBy = "terraform"
     }
   }
 }
 
 module "infra" {
-  source = "./modules/infra"
+  source       = "./modules/infra"
   project_name = var.project_name
 }
 

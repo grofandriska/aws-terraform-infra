@@ -1,5 +1,5 @@
 output "vpc_id" {
-  value = data.aws_vpc.default.id
+  value = data.aws_vpc.this.id
 }
 
 ##output "subnet_ids" {
