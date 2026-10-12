@@ -1,10 +1,10 @@
-data "aws_vpc" "default" {
-  default = true
-}
+resource "aws_vpc" "this" {
 
-data "aws_subnets" "default" {
-  filter {
-    name   = "vpc-id"
-    values = [data.aws_vpc.default.id]
-  }
+      cidr_block = var.cidr_block
+      enable_dns_hostnames = true
+      enable_dns_support = true
+
+      tags = {
+        Name = "${var.project_name}-vpc"
+      }  
 }
