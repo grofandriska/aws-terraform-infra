@@ -53,7 +53,7 @@ resource "aws_launch_template" "this" {
     http_endpoint = "enabled"
     http_tokens   = "required"
   }
-
+  # Pod script
   user_data = base64encode(file("${path.module}/user_data.sh"))
 }
 

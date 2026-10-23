@@ -5,7 +5,7 @@ variable "region" {
 
 variable "project_name" {
   type        = string
-  default     = "Auto-Scale-Infra"
+  default     = "auto-scale-infra"
   description = "Előtag minden erőforrás nevéhez, hogy a közös fiókban ne ütközzön."
 
   validation {

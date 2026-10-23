@@ -1,7 +1,11 @@
 output "vpc_id" {
-  value = data.aws_vpc.this.id
+  value = aws_vpc.this.id
 }
 
-##output "subnet_ids" {
-##  value = data.aws_subnets.default.ids
-##}
+output "public_subnet_ids" {
+  value = aws_subnet.subnet_public[*].id
+}
+
+output "private_subnet_ids" {
+  value = aws_subnet.subnet_private[*].id
+}
