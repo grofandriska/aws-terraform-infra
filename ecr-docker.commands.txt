@@ -1,0 +1,18 @@
+# 1. ECR repók létrehozása (envs/eks-proxy-ban)
+cd envs/eks-proxy
+terraform init
+terraform apply -target=module.ecr
+terraform output ecr_repository_urls
+
+# 2. Docker login (a gyökérből vagy bárhonnan)
+aws ecr get-login-password --region eu-central-1 | \
+  docker login --username AWS --password-stdin <FIÓK_ID>.dkr.ecr.eu-central-1.amazonaws.com
+
+# 3. Build, tag, push (a projekt gyökeréből), service-b-re ugyanígy
+docker build -t service-a apps/service-a
+docker tag service-a:latest <SERVICE_A_URL>:v1
+docker push <SERVICE_A_URL>:v1
+
+# 4. Ellenőrzés
+aws ecr list-images --repository-name bandi-eks-task/service-a
+aws ecr list-images --repository-name bandi-eks-task/service-b
