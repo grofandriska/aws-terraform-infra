@@ -20,7 +20,7 @@ resource "aws_vpc" "this" {
   }
 }
 
-resource "aws_subnet" "subnet_public" {
+resource "aws_subnet" "public" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
   cidr_block = cidrsubnet(var.cidr_block,8,count.index) 
   map_public_ip_on_launch = false
@@ -34,7 +34,7 @@ resource "aws_subnet" "subnet_public" {
   }
 }
 
-resource "aws_subnet" "subnet_private" {
+resource "aws_subnet" "private" {
   availability_zone = data.aws_availability_zones.available.names[count.index]
 cidr_block = cidrsubnet(var.cidr_block, 8, count.index + 10)
   
@@ -47,20 +47,22 @@ cidr_block = cidrsubnet(var.cidr_block, 8, count.index + 10)
   }
 }
 
+
+
 resource "aws_nat_gateway" "nat-gw" {
     allocation_id = aws_eip.nat.id
     subnet_id = aws_subnet.public[0].id
     depends_on = [ aws_internet_gateway.this]
 
     tags = {
-      Name ="${var.project_name} - nat"
+      Name ="${var.project_name}-nat"
     }
 }
 
 resource "aws_route_table" "route_table_public" {
     vpc_id = aws_vpc.this.id
   
-  route = {
+  route  {
     cidr_block ="0.0.0.0/0"
     gateway_id= aws_internet_gateway.this.id
   }
@@ -76,11 +78,20 @@ resource "aws_route_table_association" "route_assoc_public" {
     route_table_id = aws_route_table.route_table_public.id
 }
 
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${var.project_name}-nat-eip"
+  }
+}
+
 resource "aws_route_table" "route_table_private" {
-    vpc_id = aws.vpc.this.id
+    vpc_id = aws_vpc.this.id
   
-  route = {
-    cidr_block ="0.0.0.0/0"
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gw.id
   }
 
   tags = {
